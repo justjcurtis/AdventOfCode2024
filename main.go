@@ -25,6 +25,7 @@ func main() {
 	runCount := flag.Int("n", 1, "Number of times to run each solution")
 	minRun := flag.Bool("min", false, "Use the minimum run time instead of the average")
 	singleDay := flag.Int("d", -1, "Run only the specified day")
+	readme := flag.Bool("r", false, "Generate performance for README.md file")
 
 	flag.Parse()
 
@@ -59,8 +60,12 @@ func main() {
 			}
 			results := solution.fn(input)
 			totalTime += minElapsed
-			utils.PrintResults(solution.day, results)
-			fmt.Printf("Day %d took %s\n", solution.day, minElapsed)
+			if !*readme {
+				utils.PrintResults(solution.day, results)
+				fmt.Printf("Day %d took %s\n", solution.day, minElapsed)
+			} else {
+				fmt.Printf("| **Day %d** | **%s** |\n", solution.day, utils.TruncateToDynamicUnit(minElapsed))
+			}
 		} else {
 			start := time.Now()
 			for i := 0; i < *runCount-1; i++ {
@@ -69,21 +74,39 @@ func main() {
 			results := solution.fn(input)
 			elapsed := time.Since(start)
 			totalTime += elapsed
-			utils.PrintResults(solution.day, results)
-			fmt.Printf("Day %d took %s\n", solution.day, elapsed/time.Duration(*runCount))
+			if !*readme {
+				utils.PrintResults(solution.day, results)
+				fmt.Printf("Day %d took %s\n", solution.day, elapsed/time.Duration(*runCount))
+			} else {
+				fmt.Printf("| **Day %d** | **%s** |\n", solution.day, utils.TruncateToDynamicUnit(elapsed/time.Duration(*runCount)))
+			}
+
 		}
 		if *singleDay == -1 {
-			println()
+			if !*readme {
+				println()
+			}
 		}
 	}
 
 	if *singleDay == -1 {
-		println("=------ Total ------=")
-		if *minRun {
-			fmt.Printf("Total time: %s\n", totalTime)
+		if !*readme {
+			println("=------ Total ------=")
+			if *minRun {
+				fmt.Printf("Total time: %s\n", totalTime)
+			} else {
+				fmt.Printf("Total time: %s\n", totalTime/time.Duration(*runCount))
+			}
 		} else {
-			fmt.Printf("Total time: %s\n", totalTime/time.Duration(*runCount))
+			fmt.Print("| ------- | ----------------------------- |\n")
+			if *minRun {
+				fmt.Printf("| **Total** | **%s** |\n", utils.TruncateToDynamicUnit(totalTime))
+			} else {
+				fmt.Printf("| **Total** | **%s** |\n", utils.TruncateToDynamicUnit(totalTime/time.Duration(*runCount)))
+			}
 		}
 	}
-	println("=-------------------=")
+	if !*readme {
+		println("=-------------------=")
+	}
 }
