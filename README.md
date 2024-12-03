@@ -68,7 +68,7 @@ To build locally:
     ```
 
 ### Results
-Results show are the min runtime for each soltuion taken over 10,000 runs as reported on my desktop (Ryzen 5 7600X). The fastest solution is shown in bold for showing off purposes. Reading the input data from disk is not included as part of the solution here so the runtime you see is the runtime of any parsing & logic requried to solve the puzzle.
+Results show are the min runtime for each soltuion taken over 10,000 runs as reported the github actions runner. The fastest solution is shown in bold for showing off purposes. Reading the input data from disk is not included as part of the solution here so the runtime you see is the runtime of any parsing & logic requried to solve the puzzle.
 >*Your results may vary*
 
 | # | Runtime (both parts) |
