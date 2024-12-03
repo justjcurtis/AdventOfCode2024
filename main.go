@@ -64,7 +64,7 @@ func main() {
 				utils.PrintResults(solution.day, results)
 				fmt.Printf("Day %d took %s\n", solution.day, minElapsed)
 			} else {
-				fmt.Printf("| **Day %d** | **%s** |\n", solution.day, utils.TruncateToDynamicUnit(minElapsed))
+				fmt.Printf("| Day %d | %s |\n", solution.day, utils.TruncateToDynamicUnit(minElapsed))
 			}
 		} else {
 			start := time.Now()
@@ -78,7 +78,7 @@ func main() {
 				utils.PrintResults(solution.day, results)
 				fmt.Printf("Day %d took %s\n", solution.day, elapsed/time.Duration(*runCount))
 			} else {
-				fmt.Printf("| **Day %d** | **%s** |\n", solution.day, utils.TruncateToDynamicUnit(elapsed/time.Duration(*runCount)))
+				fmt.Printf("| Day %d | %s |\n", solution.day, utils.TruncateToDynamicUnit(elapsed/time.Duration(*runCount)))
 			}
 
 		}
