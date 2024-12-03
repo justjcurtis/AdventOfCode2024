@@ -4,7 +4,7 @@
 README_FILE="README.md"
 
 # Generate the new content
-NEW_CONTENT=$(go run . -min -r)
+NEW_CONTENT=$(go run . -min -r -n 10000)
 
 # Find the start line index (line containing "| - | -------------------- |")
 START_LINE=$(grep -n "| - | -------------------- |" "$README_FILE" | cut -d: -f1)
@@ -33,5 +33,5 @@ fi
 mv "${README_FILE}.tmp" "$README_FILE"
 
 echo "Content updated between lines $START_LINE and $END_LINE."
-echp "New content:"
+echo "New content:"
 echo "$NEW_CONTENT"
