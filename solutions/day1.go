@@ -7,16 +7,22 @@ import (
 	"strings"
 )
 
+func parseDay1Line(line string) (int, int) {
+	strs := strings.Split(line, "   ")
+	l, _ := strconv.Atoi(strs[0])
+	r, _ := strconv.Atoi(strs[1])
+	return l, r
+}
+
 func parseDay1(input []string) ([]int, []int) {
-	left := []int{}
-	right := []int{}
-	for _, line := range input {
-		strs := strings.Split(line, "   ")
-		l, _ := strconv.Atoi(strs[0])
-		r, _ := strconv.Atoi(strs[1])
-		left = append(left, l)
-		right = append(right, r)
+	left := make([]int, len(input))
+	right := make([]int, len(input))
+	fn := func(i int) {
+		l, r := parseDay1Line(input[i])
+		left[i] = l
+		right[i] = r
 	}
+	utils.ParalleliseVoid(fn, len(input))
 	sort.Ints(left)
 	sort.Ints(right)
 	return left, right
