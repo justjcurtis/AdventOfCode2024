@@ -1,7 +1,6 @@
 package solutions
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -78,7 +77,6 @@ func getCross(x, y int, input []string) []string {
 	}
 	curr := input[y][x]
 	strs := []string{string(cross[0] + curr + cross[3]), string(cross[1] + curr + cross[2])}
-	fmt.Println(strs)
 	return strs
 }
 
