@@ -1,6 +1,7 @@
 package solutions
 
 import (
+	"AdventOfCode2024/utils"
 	"strconv"
 	"strings"
 )
@@ -41,23 +42,21 @@ func getNeighbors(x, y, n int, d []int, input []string) []string {
 }
 
 func solveDay4Part1(input []string) int {
-	xmasCount := 0
-	for y, row := range input {
-		for x, char := range row {
-			if char == 'X' {
-				neighbors := getNeighbors(x, y, 4, noDirection, input)
-				if len(neighbors) == 0 {
-					continue
-				}
-				for _, neighbor := range neighbors {
-					if neighbor == "XMAS" {
-						xmasCount++
-					}
+	fn := func(z int) int {
+		xmasCount := 0
+		x, y := utils.OneDTwoD(z, len(input[0]))
+		char := input[y][x]
+		if char == 'X' {
+			neighbors := getNeighbors(x, y, 4, noDirection, input)
+			for _, neighbor := range neighbors {
+				if neighbor == "XMAS" {
+					xmasCount++
 				}
 			}
 		}
+		return xmasCount
 	}
-	return xmasCount
+	return utils.Parallelise(utils.IntAcc, fn, len(input)*len(input[0]))
 }
 
 func getCross(x, y int, input []string) []string {
@@ -81,21 +80,21 @@ func getCross(x, y int, input []string) []string {
 }
 
 func solveDay4Part2(input []string) int {
-	crossCount := 0
-	for y, row := range input {
-		for x, char := range row {
-			if char == 'A' {
-				crosses := getCross(x, y, input)
-				if len(crosses) == 0 {
-					continue
-				}
-				if crosses[0] == "á" && crosses[1] == "á" {
-					crossCount++
-				}
+	fn := func(z int) int {
+		x, y := utils.OneDTwoD(z, len(input[0]))
+		char := input[y][x]
+		if char == 'A' {
+			crosses := getCross(x, y, input)
+			if len(crosses) == 0 {
+				return 0
+			}
+			if crosses[0] == "á" && crosses[1] == "á" {
+				return 1
 			}
 		}
+		return 0
 	}
-	return crossCount
+	return utils.Parallelise(utils.IntAcc, fn, len(input)*len(input[0]))
 }
 
 func Day4(input []string) []string {
