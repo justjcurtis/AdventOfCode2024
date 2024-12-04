@@ -33,7 +33,9 @@ func solveDay3Part1(input []string) int {
 func getOnlyDos(input []string) []string {
 	reg := regexp.MustCompile(`don't\(\)(.*?)do\(\)`)
 	joined := strings.Join(input, "") + "do()"
-	return []string{reg.ReplaceAllString(joined, "")}
+	result := reg.ReplaceAllString(joined, "")
+	return strings.Split(result, "do()")
+
 }
 
 func solveDay3Part2(input []string) int {
