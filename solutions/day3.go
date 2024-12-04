@@ -43,7 +43,6 @@ func getOnlyDos(input []string) []string {
 	joined := strings.Join(input, "") + "do()"
 	result := reg.ReplaceAllString(joined, "")
 	return strings.Split(result, "do()")
-
 }
 
 func solveDay3Part2(input []string) int {
