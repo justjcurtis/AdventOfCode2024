@@ -27,6 +27,17 @@ func parseInput(f *os.File) []string {
 	return lines
 }
 
+func GetTestInput(day int) []string {
+	cwd, _ := os.Getwd()
+	parentDir := filepath.Dir(cwd)
+	f, err := os.Open(parentDir + "/puzzleInput/test_" + strconv.Itoa(day) + ".txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	return parseInput(f)
+}
+
 func GetInputForTest(day int) []string {
 	cwd, _ := os.Getwd()
 	parentDir := filepath.Dir(cwd)
