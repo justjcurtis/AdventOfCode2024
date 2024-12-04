@@ -7,17 +7,11 @@ import (
 	"bufio"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
-func GetInput(day int) []string {
-	cwd, _ := os.Getwd()
-	f, err := os.Open(cwd + "/puzzleInput/day_" + strconv.Itoa(day) + ".txt")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
+func parseInput(f *os.File) []string {
 	lines := make([]string, 0)
 	rd := bufio.NewReader(f)
 	for {
@@ -31,4 +25,25 @@ func GetInput(day int) []string {
 		lines = append(lines, string(line))
 	}
 	return lines
+}
+
+func GetInputForTest(day int) []string {
+	cwd, _ := os.Getwd()
+	parentDir := filepath.Dir(cwd)
+	f, err := os.Open(parentDir + "/puzzleInput/day_" + strconv.Itoa(day) + ".txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	return parseInput(f)
+}
+
+func GetInput(day int) []string {
+	cwd, _ := os.Getwd()
+	f, err := os.Open(cwd + "/puzzleInput/day_" + strconv.Itoa(day) + ".txt")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	return parseInput(f)
 }
