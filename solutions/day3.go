@@ -5,13 +5,21 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
+var intsCache = sync.Map{}
+
 func getIntsFromMulString(s string) (int, int) {
+	if val, ok := intsCache.Load(s); ok {
+		cachedInts := val.([]int)
+		return cachedInts[0], cachedInts[1]
+	}
 	reg := regexp.MustCompile(`mul\((\d+),(\d+)\)`)
 	matches := reg.FindStringSubmatch(s)
 	a, _ := strconv.Atoi(matches[1])
 	b, _ := strconv.Atoi(matches[2])
+	intsCache.Store(s, []int{a, b})
 	return a, b
 }
 
