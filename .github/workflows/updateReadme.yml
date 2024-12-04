@@ -19,6 +19,8 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.23.3
+      - name: Run Tests
+        run: go test ./...
       - name: Update README
         shell: bash
         run: ./scripts/updatePerformanceTable.sh
