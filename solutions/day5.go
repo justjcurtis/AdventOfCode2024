@@ -38,7 +38,11 @@ func parseUpdate(line string) []int {
 
 func parseDay5Input(input []string) (day5Rules, [][]int) {
 	rules := day5Rules{afters: map[int]map[int]bool{}}
-	fn := func() {
+	updatesList := [][]int{}
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
 		for _, line := range input {
 			if line == "" {
 				break
@@ -46,9 +50,9 @@ func parseDay5Input(input []string) (day5Rules, [][]int) {
 			a, b := parseRule(line)
 			rules.addRule(a, b)
 		}
-	}
-	updatesList := [][]int{}
-	fn2 := func() {
+	}()
+	go func() {
+		defer wg.Done()
 		foundBreak := false
 		for _, line := range input {
 			if !foundBreak {
@@ -60,17 +64,6 @@ func parseDay5Input(input []string) (day5Rules, [][]int) {
 			}
 			updatesList = append(updatesList, parseUpdate(line))
 		}
-	}
-
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		fn()
-	}()
-	go func() {
-		defer wg.Done()
-		fn2()
 	}()
 	wg.Wait()
 
