@@ -4,7 +4,7 @@
 README_FILE="README.md"
 
 # Generate the new content
-NEW_CONTENT=$(go run . -min -r -n 10000)
+NEW_CONTENT=$(go run . -min -r -n=10000)
 
 # Find the start line index (line containing "| - | -------------------- |")
 START_LINE=$(grep -n "| - | -------------------- |" "$README_FILE" | cut -d: -f1)
