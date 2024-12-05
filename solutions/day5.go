@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
 type day5Rules struct {
@@ -76,83 +77,55 @@ func parseDay5Input(input []string) (day5Rules, [][]int) {
 	return rules, updatesList
 }
 
-func checkUpdate(i int, updates []int, rules day5Rules) int {
-	a := updates[i]
-	for j, b := range updates[i+1:] {
-		if _, ok := rules.afters[b]; ok {
-			if _, ok := rules.afters[b][a]; ok {
-				return j + i + 1
+func checkUpdatesAndGetMiddle(rules day5Rules, updates []int) int {
+	lastCount := len(updates)
+	middleCount := len(updates) / 2
+	middleIndex := -1
+	failed := false
+	for i := 0; i < len(updates); i++ {
+		count := 0
+		if v, ok := rules.afters[updates[i]]; ok {
+			for j := 0; j < len(updates); j++ {
+				if i == j {
+					continue
+				}
+				if _, ok := v[updates[j]]; ok {
+					count++
+				}
 			}
 		}
+		if middleIndex == -1 && count == middleCount {
+			middleIndex = i
+		}
+		if count > lastCount {
+			failed = true
+		}
+		if failed && middleIndex != -1 {
+			return updates[middleIndex]
+		}
+		lastCount = count
 	}
 	return -1
 }
 
-func checkUpdates(updates []int, rules day5Rules, start int) (int, int) {
-	for i := start; i < len(updates)-1; i++ {
-		j := checkUpdate(i, updates, rules)
-		if j > -1 {
-			return i, j
-		}
-	}
-	return -1, -1
-}
-
-func solveDay5Part1(rules day5Rules, updatesList [][]int) int {
-	fn := func(index int) int {
+func solveDay5Part1And2(rules day5Rules, updatesList [][]int) (int, int) {
+	part1 := int32(0)
+	part2 := int32(0)
+	fn := func(index int) {
 		updates := updatesList[index]
-		if faili, _ := checkUpdates(updates, rules, 0); faili > -1 {
-			return 0
+		if middle := checkUpdatesAndGetMiddle(rules, updates); middle != -1 {
+			atomic.AddInt32(&part2, int32(middle))
+			return
 		}
-		return updates[(len(updates) / 2)]
-	}
-	result := utils.Parallelise(utils.IntAcc, fn, len(updatesList))
-	return result
-}
+		atomic.AddInt32(&part1, int32(updates[(len(updates)/2)]))
 
-func swap(i, j int, arr []int) {
-	arr[i], arr[j] = arr[j], arr[i]
-}
-
-func solveDay5Part2(rules day5Rules, updatesList [][]int) int {
-	fn := func(index int) int {
-		updates := updatesList[index]
-		faili, failj := checkUpdates(updates, rules, 0)
-		if faili == -1 {
-			return 0
-		}
-		swap(faili, failj, updates)
-		for faili > -1 {
-			newFaili, newFailj := checkUpdates(updates, rules, faili)
-			if newFaili == -1 {
-				break
-			}
-			swap(newFaili, newFailj, updates)
-			faili, failj = newFaili, newFailj
-		}
-		return updates[(len(updates) / 2)]
 	}
-	return utils.Parallelise(utils.IntAcc, fn, len(updatesList))
+	utils.ParalleliseVoid(fn, len(updatesList))
+	return int(part1), int(part2)
 }
 
 func Day5(input []string) []string {
 	rules, updatesList := parseDay5Input(input)
-	var solution1, solution2 int
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		solution1 = solveDay5Part1(rules, updatesList)
-	}()
-	go func() {
-		defer wg.Done()
-		updatesCopy := make([][]int, len(updatesList))
-		for i, updates := range updatesList {
-			updatesCopy[i] = make([]int, len(updates))
-			copy(updatesCopy[i], updates)
-		}
-		solution2 = solveDay5Part2(rules, updatesCopy)
-	}()
-	wg.Wait()
+	solution1, solution2 := solveDay5Part1And2(rules, updatesList)
 	return []string{strconv.Itoa(solution1), strconv.Itoa(solution2)}
 }
