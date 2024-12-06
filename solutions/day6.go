@@ -76,7 +76,7 @@ func turnRight(currentDir []int) []int {
 	return []int{0, 1}
 }
 
-func dirIndex(currentDir []int) int {
+func getDirIndex(currentDir []int) int {
 	if currentDir[0] == 0 {
 		if currentDir[1] == 1 {
 			return 0
@@ -107,25 +107,27 @@ func solveDay6Part1(startPos []int, _map [][]bool) (int, map[int][]int) {
 			continue
 		}
 		hash := utils.TwoDToOneD(currentPos[1], currentPos[0], len(_map[0]))
+		dirIndex := getDirIndex(currentDir)
 		if v, ok := visited[hash]; ok {
-			if v[dirIndex(currentDir)] >= 0 {
+			if v[dirIndex] >= 0 {
 				return -1, nil
 			}
 		} else {
 			visited[hash] = []int{-1, -1, -1, -1}
 		}
-		visited[hash][dirIndex(currentDir)] = step
+		visited[hash][dirIndex] = step
 		currentPos[0] += currentDir[0]
 		currentPos[1] += currentDir[1]
 	}
 	return len(visited), visited
 }
 
-func hasloop(x, y int, dir []int, _map [][]bool) bool {
+func hasloop(x, y, step int, dir []int, originalVisited map[int][]int, _map [][]bool) bool {
 	visited := map[int][]bool{}
 	currentDir := dir
 	currentPos := []int{y, x}
 	for true {
+		step++
 		if currentPos[0] < 0 || currentPos[0] >= len(_map) ||
 			currentPos[1] < 0 || currentPos[1] >= len(_map[0]) {
 			break
@@ -138,14 +140,20 @@ func hasloop(x, y int, dir []int, _map [][]bool) bool {
 			continue
 		}
 		hash := utils.TwoDToOneD(currentPos[1], currentPos[0], len(_map[0]))
+		dirIndex := getDirIndex(currentDir)
 		if v, ok := visited[hash]; ok {
-			if v[dirIndex(currentDir)] {
+			if v[dirIndex] {
 				return true
 			}
 		} else {
+			if v, ok := originalVisited[hash]; ok {
+				if v[dirIndex] >= 0 && v[dirIndex] < step-1 {
+					return true
+				}
+			}
 			visited[hash] = []bool{false, false, false, false}
 		}
-		visited[hash][dirIndex(currentDir)] = true
+		visited[hash][dirIndex] = true
 		currentPos[0] += currentDir[0]
 		currentPos[1] += currentDir[1]
 	}
@@ -174,7 +182,7 @@ func solveDay6Part2(startPos []int, _map [][]bool, visited map[int][]int) int {
 			}
 		}
 
-		if hasloop(x, y, DIRS[lowestDirIndex], _map) {
+		if hasloop(x, y, dirs[lowestDirIndex], DIRS[lowestDirIndex], visited, _map) {
 			return 1
 		}
 		return 0
