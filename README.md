@@ -73,13 +73,14 @@ Results show are the min runtime for each soltuion taken over 10,000 runs as rep
 
 | # | Runtime (both parts) |
 | - | -------------------- |
-| Day 1 | 251µs |
-| Day 2 | 286µs |
-| Day 3 | 805µs |
-| Day 4 | 862µs |
-| Day 5 | 605µs |
+| Day 1 | 256µs |
+| Day 2 | 289µs |
+| Day 3 | 806µs |
+| Day 4 | 867µs |
+| Day 5 | 608µs |
+| Day 6 | 318ms |
 | ------- | ----------------------------- |
-| **Total** | **2ms** |
+| **Total** | **321ms** |
 
 
 ##### [Take Me To The TOP!](#top)
