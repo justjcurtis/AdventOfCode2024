@@ -89,16 +89,49 @@ func dirIndex(currentDir []int) int {
 	return 3
 }
 
-func solveDay6Part1(startPos []int, _map [][]bool, extraObstacle []int) (int, map[int][]bool) {
-	visited := map[int][]bool{}
+func solveDay6Part1(startPos []int, _map [][]bool) (int, map[int][]int) {
+	visited := map[int][]int{}
 	currentDir := []int{-1, 0}
 	currentPos := []int{startPos[0], startPos[1]}
+	step := -1
 	for true {
-		if currentPos[0] < 0 || currentPos[0] >= len(_map) || currentPos[1] < 0 || currentPos[1] >= len(_map[0]) {
+		step++
+		if currentPos[0] < 0 || currentPos[0] >= len(_map) ||
+			currentPos[1] < 0 || currentPos[1] >= len(_map[0]) {
+			break
+		}
+		if _map[currentPos[0]][currentPos[1]] {
+			currentPos[0] -= currentDir[0]
+			currentPos[1] -= currentDir[1]
+			currentDir = turnRight(currentDir)
+			continue
+		}
+		hash := utils.TwoDToOneD(currentPos[1], currentPos[0], len(_map[0]))
+		if v, ok := visited[hash]; ok {
+			if v[dirIndex(currentDir)] >= 0 {
+				return -1, nil
+			}
+		} else {
+			visited[hash] = []int{-1, -1, -1, -1}
+		}
+		visited[hash][dirIndex(currentDir)] = step
+		currentPos[0] += currentDir[0]
+		currentPos[1] += currentDir[1]
+	}
+	return len(visited), visited
+}
+
+func hasloop(x, y int, dir []int, _map [][]bool) bool {
+	visited := map[int][]bool{}
+	currentDir := dir
+	currentPos := []int{y, x}
+	for true {
+		if currentPos[0] < 0 || currentPos[0] >= len(_map) ||
+			currentPos[1] < 0 || currentPos[1] >= len(_map[0]) {
 			break
 		}
 		if _map[currentPos[0]][currentPos[1]] ||
-			(extraObstacle != nil && currentPos[0] == extraObstacle[0] && currentPos[1] == extraObstacle[1]) {
+			(currentPos[0] == y && currentPos[1] == x) {
 			currentPos[0] -= currentDir[0]
 			currentPos[1] -= currentDir[1]
 			currentDir = turnRight(currentDir)
@@ -107,7 +140,7 @@ func solveDay6Part1(startPos []int, _map [][]bool, extraObstacle []int) (int, ma
 		hash := utils.TwoDToOneD(currentPos[1], currentPos[0], len(_map[0]))
 		if v, ok := visited[hash]; ok {
 			if v[dirIndex(currentDir)] {
-				return -1, visited
+				return true
 			}
 		} else {
 			visited[hash] = []bool{false, false, false, false}
@@ -116,27 +149,42 @@ func solveDay6Part1(startPos []int, _map [][]bool, extraObstacle []int) (int, ma
 		currentPos[0] += currentDir[0]
 		currentPos[1] += currentDir[1]
 	}
-	return len(visited), visited
+	return false
 }
 
-func solveDay6Part2(startPos []int, _map [][]bool, visited map[int][]bool) int {
-	count := 0
+func solveDay6Part2(startPos []int, _map [][]bool, visited map[int][]int) int {
+	keys := []int{}
+	DIRS := [][]int{{0, 1}, {0, -1}, {1, 0}, {-1, 0}}
 	for k := range visited {
+		keys = append(keys, k)
+	}
+	fn := func(i int) int {
+		k := keys[i]
 		x, y := utils.OneDTwoD(k, len(_map[0]))
 		if x == startPos[1] && y == startPos[0] {
-			continue
+			return 0
 		}
-		result, _ := solveDay6Part1(startPos, _map, []int{y, x})
-		if result == -1 {
-			count++
+		dirs := visited[k]
+		lowestDirIndex := -1
+		for i := 0; i < 4; i++ {
+			if dirs[i] >= 0 {
+				if lowestDirIndex == -1 || dirs[i] < dirs[lowestDirIndex] {
+					lowestDirIndex = i
+				}
+			}
 		}
+
+		if hasloop(x, y, DIRS[lowestDirIndex], _map) {
+			return 1
+		}
+		return 0
 	}
-	return count
+	return utils.Parallelise(utils.IntAcc, fn, len(keys))
 }
 
 func Day6(input []string) []string {
 	currentPos, _map := parseDay6Input(input)
-	solution1, visited := solveDay6Part1(currentPos, _map, nil)
+	solution1, visited := solveDay6Part1(currentPos, _map)
 	solution2 := solveDay6Part2(currentPos, _map, visited)
 	return []string{strconv.Itoa(solution1), strconv.Itoa(solution2)}
 }
