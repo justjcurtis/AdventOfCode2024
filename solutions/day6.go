@@ -27,7 +27,7 @@ func parseDay6Input(input []string) ([]int, [][]bool) {
 	return currentPos, _map
 }
 
-func printMap(startPos []int, visited map[int][]bool, _map [][]bool, extraObstacle []int) {
+func printMap(startPos []int, visited map[int][]int, _map [][]bool, extraObstacle []int) {
 	for i := 0; i < len(_map); i++ {
 		for j := 0; j < len(_map[0]); j++ {
 			hash := utils.TwoDToOneD(j, i, len(_map[0]))
@@ -40,15 +40,15 @@ func printMap(startPos []int, visited map[int][]bool, _map [][]bool, extraObstac
 					fmt.Print("O")
 					continue
 				}
-				if v[0] || v[1] {
-					if v[2] || v[3] {
+				if v[1] >= 0 || v[3] >= 0 {
+					if v[0] >= 0 || v[2] >= 0 {
 						fmt.Print("+")
 						continue
 					}
 					fmt.Print("-")
 					continue
 				}
-				if v[2] || v[3] {
+				if v[0] >= 0 || v[2] >= 0 {
 					fmt.Print("|")
 				}
 				continue
@@ -63,39 +63,20 @@ func printMap(startPos []int, visited map[int][]bool, _map [][]bool, extraObstac
 	}
 }
 
-func turnRight(currentDir []int) []int {
-	if currentDir[0] == 0 {
-		if currentDir[1] == 1 {
-			return []int{1, 0}
-		}
-		return []int{-1, 0}
-	}
-	if currentDir[0] == 1 {
-		return []int{0, -1}
-	}
-	return []int{0, 1}
-}
+var day6Directions = [][]int{{-1, 0}, {0, 1}, {1, 0}, {0, -1}}
 
-func getDirIndex(currentDir []int) int {
-	if currentDir[0] == 0 {
-		if currentDir[1] == 1 {
-			return 0
-		}
-		return 1
-	}
-	if currentDir[0] == 1 {
-		return 2
-	}
-	return 3
+func turnRight(dirIndex int) ([]int, int) {
+	dirIndex = (dirIndex + 1) % 4
+	return day6Directions[dirIndex], dirIndex
 }
 
 func solveDay6Part1(startPos []int, _map [][]bool) (int, map[int][]int) {
 	visited := map[int][]int{}
-	currentDir := []int{-1, 0}
+	dirIndex := 0
+	currentDir := day6Directions[dirIndex]
 	currentPos := []int{startPos[0], startPos[1]}
-	step := -1
+	step := 0
 	for true {
-		step++
 		if currentPos[0] < 0 || currentPos[0] >= len(_map) ||
 			currentPos[1] < 0 || currentPos[1] >= len(_map[0]) {
 			break
@@ -103,11 +84,10 @@ func solveDay6Part1(startPos []int, _map [][]bool) (int, map[int][]int) {
 		if _map[currentPos[0]][currentPos[1]] {
 			currentPos[0] -= currentDir[0]
 			currentPos[1] -= currentDir[1]
-			currentDir = turnRight(currentDir)
+			currentDir, dirIndex = turnRight(dirIndex)
 			continue
 		}
 		hash := utils.TwoDToOneD(currentPos[1], currentPos[0], len(_map[0]))
-		dirIndex := getDirIndex(currentDir)
 		if v, ok := visited[hash]; ok {
 			if v[dirIndex] >= 0 {
 				return -1, nil
@@ -118,16 +98,16 @@ func solveDay6Part1(startPos []int, _map [][]bool) (int, map[int][]int) {
 		visited[hash][dirIndex] = step
 		currentPos[0] += currentDir[0]
 		currentPos[1] += currentDir[1]
+		step++
 	}
 	return len(visited), visited
 }
 
-func hasloop(x, y, step int, dir []int, originalVisited map[int][]int, _map [][]bool) bool {
+func hasLoop(x, y, step, dirIndex int, originalVisited map[int][]int, _map [][]bool) bool {
 	visited := map[int][]bool{}
-	currentDir := dir
+	currentDir := day6Directions[dirIndex]
 	currentPos := []int{y, x}
 	for true {
-		step++
 		if currentPos[0] < 0 || currentPos[0] >= len(_map) ||
 			currentPos[1] < 0 || currentPos[1] >= len(_map[0]) {
 			break
@@ -136,18 +116,17 @@ func hasloop(x, y, step int, dir []int, originalVisited map[int][]int, _map [][]
 			(currentPos[0] == y && currentPos[1] == x) {
 			currentPos[0] -= currentDir[0]
 			currentPos[1] -= currentDir[1]
-			currentDir = turnRight(currentDir)
+			currentDir, dirIndex = turnRight(dirIndex)
 			continue
 		}
 		hash := utils.TwoDToOneD(currentPos[1], currentPos[0], len(_map[0]))
-		dirIndex := getDirIndex(currentDir)
 		if v, ok := visited[hash]; ok {
 			if v[dirIndex] {
 				return true
 			}
 		} else {
 			if v, ok := originalVisited[hash]; ok {
-				if v[dirIndex] >= 0 && v[dirIndex] < step-1 {
+				if v[dirIndex] >= 0 && v[dirIndex] < step {
 					return true
 				}
 			}
@@ -162,7 +141,6 @@ func hasloop(x, y, step int, dir []int, originalVisited map[int][]int, _map [][]
 
 func solveDay6Part2(startPos []int, _map [][]bool, visited map[int][]int) int {
 	keys := []int{}
-	DIRS := [][]int{{0, 1}, {0, -1}, {1, 0}, {-1, 0}}
 	for k := range visited {
 		keys = append(keys, k)
 	}
@@ -182,7 +160,7 @@ func solveDay6Part2(startPos []int, _map [][]bool, visited map[int][]int) int {
 			}
 		}
 
-		if hasloop(x, y, dirs[lowestDirIndex], DIRS[lowestDirIndex], visited, _map) {
+		if hasLoop(x, y, dirs[lowestDirIndex]-1, lowestDirIndex, visited, _map) {
 			return 1
 		}
 		return 0
