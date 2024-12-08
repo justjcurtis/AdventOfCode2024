@@ -13,6 +13,31 @@ type AntennaMap struct {
 	coords map[rune][][]int
 }
 
+func printMapWithAntinodes(antennaMap AntennaMap, antinodeHashes *sync.Map) {
+	_map := make([][]rune, antennaMap.height)
+	for i := 0; i < antennaMap.height; i++ {
+		_map[i] = make([]rune, antennaMap.width)
+	}
+	for i := 0; i < antennaMap.height; i++ {
+		for j := 0; j < antennaMap.width; j++ {
+			hash := utils.TwoDToOneD(j, i, antennaMap.width)
+			if _, ok := antinodeHashes.Load(hash); ok {
+				_map[i][j] = 'X'
+			} else {
+				_map[i][j] = '.'
+			}
+		}
+	}
+	for k, coords := range antennaMap.coords {
+		for _, coord := range coords {
+			_map[coord[1]][coord[0]] = k
+		}
+	}
+	for i := 0; i < antennaMap.height; i++ {
+		fmt.Println(string(_map[i]))
+	}
+}
+
 func parseDay8(input []string) AntennaMap {
 	antennaMap := AntennaMap{len(input[0]), len(input), make(map[rune][][]int)}
 	for i, line := range input {
@@ -50,39 +75,7 @@ func getAntinodeCoords(a []int, b []int, w, h int, getAll bool) [][]int {
 		coords = append(coords, a)
 		coords = append(coords, b)
 	}
-	filtered := [][]int{}
-	for _, coord := range coords {
-		if coord[0] < 0 || coord[0] >= h || coord[1] < 0 || coord[1] >= w {
-			continue
-		}
-		filtered = append(filtered, coord)
-	}
-	return filtered
-}
-
-func printMapWithAntinodes(antennaMap AntennaMap, antinodeHashes sync.Map) {
-	_map := make([][]rune, antennaMap.height)
-	for i := 0; i < antennaMap.height; i++ {
-		_map[i] = make([]rune, antennaMap.width)
-	}
-	for i := 0; i < antennaMap.height; i++ {
-		for j := 0; j < antennaMap.width; j++ {
-			hash := utils.TwoDToOneD(j, i, antennaMap.width)
-			if _, ok := antinodeHashes.Load(hash); ok {
-				_map[i][j] = 'X'
-			} else {
-				_map[i][j] = '.'
-			}
-		}
-	}
-	for k, coords := range antennaMap.coords {
-		for _, coord := range coords {
-			_map[coord[1]][coord[0]] = k
-		}
-	}
-	for i := 0; i < antennaMap.height; i++ {
-		fmt.Println(string(_map[i]))
-	}
+	return coords
 }
 
 func solveDay8(antennaMap AntennaMap, getAll bool) int {
