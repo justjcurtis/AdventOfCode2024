@@ -98,8 +98,15 @@ func getIntLength(num int) int {
 		return 1
 	case num < 100:
 		return 2
-	default:
+	case num < 1000:
 		return 3
+	default:
+		length := 0
+		for num > 0 {
+			num /= 10
+			length++
+		}
+		return length
 	}
 }
 
