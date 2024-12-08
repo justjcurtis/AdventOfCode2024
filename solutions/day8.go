@@ -2,7 +2,6 @@ package solutions
 
 import (
 	"AdventOfCode2024/utils"
-	"fmt"
 	"strconv"
 	"sync"
 )
@@ -10,47 +9,30 @@ import (
 type AntennaMap struct {
 	width  int
 	height int
-	coords map[rune][][]int
-}
-
-func printMapWithAntinodes(antennaMap AntennaMap, antinodeHashes *sync.Map) {
-	_map := make([][]rune, antennaMap.height)
-	for i := 0; i < antennaMap.height; i++ {
-		_map[i] = make([]rune, antennaMap.width)
-	}
-	for i := 0; i < antennaMap.height; i++ {
-		for j := 0; j < antennaMap.width; j++ {
-			hash := utils.TwoDToOneD(j, i, antennaMap.width)
-			if _, ok := antinodeHashes.Load(hash); ok {
-				_map[i][j] = 'X'
-			} else {
-				_map[i][j] = '.'
-			}
-		}
-	}
-	for k, coords := range antennaMap.coords {
-		for _, coord := range coords {
-			_map[coord[1]][coord[0]] = k
-		}
-	}
-	for i := 0; i < antennaMap.height; i++ {
-		fmt.Println(string(_map[i]))
-	}
+	coords [][][]int
 }
 
 func parseDay8(input []string) AntennaMap {
-	antennaMap := AntennaMap{len(input[0]), len(input), make(map[rune][][]int)}
-	for i, line := range input {
+	antennaMap := AntennaMap{len(input[0]), len(input), [][][]int{}}
+	runeMap := map[rune]int{}
+	mu := sync.Mutex{}
+	fn := func(i int) {
+		line := input[i]
 		for j, char := range line {
 			if char == '.' {
 				continue
 			}
-			if antennaMap.coords[char] == nil {
-				antennaMap.coords[char] = [][]int{}
+			mu.Lock()
+			if _, ok := runeMap[char]; !ok {
+				runeMap[char] = len(antennaMap.coords)
+				antennaMap.coords = append(antennaMap.coords, [][]int{})
 			}
-			antennaMap.coords[char] = append(antennaMap.coords[char], []int{j, i})
+			index := runeMap[char]
+			antennaMap.coords[index] = append(antennaMap.coords[index], []int{j, i})
+			mu.Unlock()
 		}
 	}
+	utils.ParalleliseVoid(fn, len(input))
 	return antennaMap
 }
 
@@ -79,25 +61,29 @@ func getAntinodeCoords(a []int, b []int, w, h int, getAll bool) [][]int {
 }
 
 func solveDay8(antennaMap AntennaMap, getAll bool) int {
-	antinodeHashes := sync.Map{}
-	keys := []rune{}
-	for key := range antennaMap.coords {
-		keys = append(keys, key)
-	}
+	maxHash := utils.TwoDToOneD(antennaMap.width-1, antennaMap.height-1, antennaMap.width)
+	antinodeHashes := make([]bool, maxHash+1)
+	antinodeCount := 0
+	mu := sync.Mutex{}
 	fn := func(index int) {
-		coords := antennaMap.coords[keys[index]]
+		coords := antennaMap.coords[index]
 		for i := 0; i < len(coords)-1; i++ {
 			for j := i + 1; j < len(coords); j++ {
 				antinodes := getAntinodeCoords(coords[i], coords[j], antennaMap.width, antennaMap.height, getAll)
 				for _, antinode := range antinodes {
 					hash := utils.TwoDToOneD(antinode[1], antinode[0], antennaMap.width)
-					antinodeHashes.Store(hash, true)
+					mu.Lock()
+					if !antinodeHashes[hash] {
+						antinodeHashes[hash] = true
+						antinodeCount++
+					}
+					mu.Unlock()
 				}
 			}
 		}
 	}
-	utils.ParalleliseVoid(fn, len(keys))
-	return utils.SynMapLength(&antinodeHashes)
+	utils.ParalleliseVoid(fn, len(antennaMap.coords))
+	return antinodeCount
 }
 
 func Day8(input []string) []string {
