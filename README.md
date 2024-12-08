@@ -68,7 +68,7 @@ To build locally:
     ```
 
 ### Results
-Results show are the min runtime for each soltuion taken over 10,000 runs as reported by the github actions runner. Reading the input data from disk is not included as part of the solution here so the runtime you see is the runtime of any parsing & logic requried to solve the puzzle.
+Results show are the min runtime for each soltuion taken over 10 runs as reported by the github actions runner. Reading the input data from disk is not included as part of the solution here so the runtime you see is the runtime of any parsing & logic requried to solve the puzzle.
 >*Your results may vary*
 
 | # | Runtime (both parts) |
