@@ -14,3 +14,12 @@ func TestDay7TestInput(t *testing.T) {
 		t.Errorf("Expected %v but got %v", expected, actual)
 	}
 }
+
+func TestDay7(t *testing.T) {
+	input := utils.GetInputForTest(7)
+	expected := []string{"2299996598890", "362646859298554"}
+	actual := Day7(input)
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("Expected %v but got %v", expected, actual)
+	}
+}

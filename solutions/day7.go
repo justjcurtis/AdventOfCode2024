@@ -4,7 +4,6 @@ import (
 	"AdventOfCode2024/utils"
 	"math"
 	"strconv"
-	"sync"
 )
 
 type day7Op struct {
@@ -71,10 +70,7 @@ func recurseDay7(line []int, ops []day7Op, currentOps []int) bool {
 		return false
 	}
 	for i := range ops {
-		newOps := []int{}
-		newOps = append(newOps, currentOps...)
-		newOps = append(newOps, i)
-		if recurseDay7(line, ops, newOps) {
+		if recurseDay7(line, ops, append(currentOps, i)) {
 			return true
 		}
 	}
