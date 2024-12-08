@@ -9,8 +9,8 @@ import (
 )
 
 type day7Op struct {
-	id string
-	op func(a, b int) int
+	id        string
+	calculate func(a, b int) int
 }
 
 var day7Part1Ops = []day7Op{
@@ -55,22 +55,20 @@ func parseDay7(input []string) [][]int {
 
 }
 
-func calculateResult(line []int, ops []day7Op, currentOps []int) bool {
-	value := line[1]
-	for i := 2; i < len(line); i++ {
-		value = ops[currentOps[i-2]].op(value, line[i])
+func recurseDay7(line []int, ops []day7Op, currentOps []int, depth, target, current int) bool {
+	if current > target {
+		return false
 	}
-	result := value == line[0]
-	return result
-}
-
-func recurseDay7(line []int, ops []day7Op, currentOps []int, depth int) bool {
 	if depth == len(line)-2 {
-		return calculateResult(line, ops, currentOps)
+		return current == target
+	}
+	if depth == 0 {
+		current = line[1]
 	}
 	for i := range ops {
 		currentOps[depth] = i
-		if recurseDay7(line, ops, currentOps, depth+1) {
+		result := recurseDay7(line, ops, currentOps, depth+1, target, ops[i].calculate(current, line[depth+2]))
+		if result {
 			return true
 		}
 	}
@@ -82,8 +80,9 @@ var day7SkipCache = sync.Map{}
 func solveDay7Part1(parsed [][]int) int {
 	fn := func(i int) int {
 		line := parsed[i]
+		target := line[0]
 		currentOps := make([]int, len(line)-2)
-		if recurseDay7(line, day7Part1Ops, currentOps, 0) {
+		if recurseDay7(line, day7Part1Ops, currentOps, 0, target, 0) {
 			day7SkipCache.Store(i, true)
 			return line[0]
 		}
@@ -126,8 +125,9 @@ func solveDay7Part2(parsed [][]int) int {
 			return 0
 		}
 		line := parsed[i]
+		target := line[0]
 		currentOps := make([]int, len(line)-2)
-		if recurseDay7(line, day7Part2Ops, currentOps, 0) {
+		if recurseDay7(line, day7Part2Ops, currentOps, 0, target, 0) {
 			return line[0]
 		}
 		return 0
