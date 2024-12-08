@@ -4,6 +4,7 @@ import (
 	"AdventOfCode2024/utils"
 	"math"
 	"strconv"
+	"sync"
 )
 
 type day7Op struct {
@@ -53,38 +54,40 @@ func parseDay7(input []string) [][]int {
 
 }
 
-func calculateResult(line []int, ops []day7Op, currentOps []int) int {
-	target := line[0]
+func calculateResult(line []int, ops []day7Op, currentOps []int) bool {
 	value := line[1]
 	for i := 2; i < len(line); i++ {
 		value = ops[currentOps[i-2]].op(value, line[i])
 	}
-	if value == target {
-		return value
-	}
-	return 0
+	result := value == line[0]
+	return result
 }
 
-func recurseDay7(line []int, ops []day7Op, currentOps []int) int {
+func recurseDay7(line []int, ops []day7Op, currentOps []int) bool {
 	if len(currentOps) == len(line)-2 {
-		return calculateResult(line, ops, currentOps)
+		if calculateResult(line, ops, currentOps) {
+			return true
+		}
+		return false
 	}
-	total := 0
 	for i := range ops {
 		newOps := []int{}
 		newOps = append(newOps, currentOps...)
 		newOps = append(newOps, i)
-		total += recurseDay7(line, ops, newOps)
-		if total > 0 {
-			break
+		if recurseDay7(line, ops, newOps) {
+			return true
 		}
 	}
-	return total
+	return false
 }
 
 func solveDay7Part1(parsed [][]int) int {
 	fn := func(i int) int {
-		return recurseDay7(parsed[i], day7Part1Ops, []int{})
+		line := parsed[i]
+		if recurseDay7(line, day7Part1Ops, []int{}) {
+			return line[0]
+		}
+		return 0
 	}
 	return utils.Parallelise(utils.IntAcc, fn, len(parsed))
 }
@@ -111,7 +114,11 @@ var day7Part2Ops = []day7Op{
 
 func solveDay7Part2(parsed [][]int) int {
 	fn := func(i int) int {
-		return recurseDay7(parsed[i], day7Part2Ops, []int{})
+		line := parsed[i]
+		if recurseDay7(line, day7Part2Ops, []int{}) {
+			return line[0]
+		}
+		return 0
 	}
 	return utils.Parallelise(utils.IntAcc, fn, len(parsed))
 }
