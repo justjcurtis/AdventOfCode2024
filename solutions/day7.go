@@ -4,6 +4,8 @@ import (
 	"AdventOfCode2024/utils"
 	"math"
 	"strconv"
+	"strings"
+	"sync"
 )
 
 type day7Op struct {
@@ -17,28 +19,28 @@ var day7Part1Ops = []day7Op{
 }
 
 func parseDay7Line(line string) []int {
-	buffer := ""
+	var buffer strings.Builder
 	index := 0
 	for i, char := range line {
 		if char == ':' {
 			index = i
 			break
 		}
-		buffer += string(char)
+		buffer.WriteRune(char)
 	}
-	testValue, _ := strconv.Atoi(buffer)
+	testValue, _ := strconv.Atoi(buffer.String())
 	nums := []int{testValue}
-	buffer = ""
+	buffer.Reset()
 	for i := index + 2; i < len(line); i++ {
 		if line[i] == ' ' {
-			num, _ := strconv.Atoi(buffer)
+			num, _ := strconv.Atoi(buffer.String())
 			nums = append(nums, num)
-			buffer = ""
+			buffer.Reset()
 			continue
 		}
-		buffer += string(line[i])
+		buffer.WriteByte(line[i])
 	}
-	num, _ := strconv.Atoi(buffer)
+	num, _ := strconv.Atoi(buffer.String())
 	nums = append(nums, num)
 	return nums
 }
@@ -62,25 +64,27 @@ func calculateResult(line []int, ops []day7Op, currentOps []int) bool {
 	return result
 }
 
-func recurseDay7(line []int, ops []day7Op, currentOps []int) bool {
-	if len(currentOps) == len(line)-2 {
-		if calculateResult(line, ops, currentOps) {
-			return true
-		}
-		return false
+func recurseDay7(line []int, ops []day7Op, currentOps []int, depth int) bool {
+	if depth == len(line)-2 {
+		return calculateResult(line, ops, currentOps)
 	}
 	for i := range ops {
-		if recurseDay7(line, ops, append(currentOps, i)) {
+		currentOps[depth] = i
+		if recurseDay7(line, ops, currentOps, depth+1) {
 			return true
 		}
 	}
 	return false
 }
 
+var day7SkipCache = sync.Map{}
+
 func solveDay7Part1(parsed [][]int) int {
 	fn := func(i int) int {
 		line := parsed[i]
-		if recurseDay7(line, day7Part1Ops, []int{}) {
+		currentOps := make([]int, len(line)-2)
+		if recurseDay7(line, day7Part1Ops, currentOps, 0) {
+			day7SkipCache.Store(i, true)
 			return line[0]
 		}
 		return 0
@@ -89,13 +93,14 @@ func solveDay7Part1(parsed [][]int) int {
 }
 
 func getIntLength(num int) int {
-	length := 0
-	use := num
-	for use > 0 {
-		use /= 10
-		length++
+	switch {
+	case num < 10:
+		return 1
+	case num < 100:
+		return 2
+	default:
+		return 3
 	}
-	return length
 }
 
 var day7Part2Ops = []day7Op{
@@ -110,8 +115,12 @@ var day7Part2Ops = []day7Op{
 
 func solveDay7Part2(parsed [][]int) int {
 	fn := func(i int) int {
+		if _, ok := day7SkipCache.Load(i); ok {
+			return 0
+		}
 		line := parsed[i]
-		if recurseDay7(line, day7Part2Ops, []int{}) {
+		currentOps := make([]int, len(line)-2)
+		if recurseDay7(line, day7Part2Ops, currentOps, 0) {
 			return line[0]
 		}
 		return 0
@@ -122,6 +131,6 @@ func solveDay7Part2(parsed [][]int) int {
 func Day7(input []string) []string {
 	parsed := parseDay7(input)
 	solution1 := solveDay7Part1(parsed)
-	solution2 := solveDay7Part2(parsed)
+	solution2 := solveDay7Part2(parsed) + solution1
 	return []string{strconv.Itoa(solution1), strconv.Itoa(solution2)}
 }
