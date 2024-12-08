@@ -169,7 +169,7 @@ func solveDay6Part2(startPos []int, _map [][]bool, visited map[int][]int) int {
 }
 
 func Day6(input []string) []string {
-	// TODO - perf: precalculate jumptable for all obstacles
+	// TODO - perf: precalculate jumptable for all obstacles in the map
 	// must support step preservation && always give valid next coords
 	// need to be able to disable for jumps that include extra obstacles
 	currentPos, _map := parseDay6Input(input)
