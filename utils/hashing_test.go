@@ -41,3 +41,22 @@ func TestTwoDToOneD(t *testing.T) {
 		}
 	}
 }
+
+func FlipTest(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		for j := 0; j < 1000; j++ {
+			if i != j {
+				pair1 := SzudzikPairing(i, j)
+				pair2 := SzudzikPairing(j, i)
+				if pair1 == pair2 {
+					t.Errorf("SzudzikPairing(%d, %d) = %d, SzudzikPairing(%d, %d) = %d", i, j, pair1, j, i, pair2)
+				}
+				I1, J1 := SzudzikUnpairing(pair1)
+				I2, J2 := SzudzikUnpairing(pair2)
+				if I1 != i || J1 != j || I2 != j || J2 != i {
+					t.Errorf("SzudzikUnpairing(%d) = (%d, %d), SzudzikUnpairing(%d) = (%d, %d)", pair1, I1, J1, pair2, I2, J2)
+				}
+			}
+		}
+	}
+}
