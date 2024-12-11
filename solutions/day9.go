@@ -2,6 +2,7 @@ package solutions
 
 import (
 	"strconv"
+	"sync"
 )
 
 func parseDay9(input []string) []int {
@@ -24,19 +25,17 @@ func solveDay9Part1(parsed []int) int {
 	for true {
 		if index >= endex {
 			if unused > 0 {
-				for i := 0; i < unused; i++ {
-					result += (endex / 2) * rindex
-					rindex++
-				}
+				val := endex / 2
+				n := unused
+				result += val * (n * (2*rindex + (n - 1)) / 2)
+				rindex += n
 			}
 			break
 		}
 		aIndex := index / 2
 		aAmnt := parsed[index]
-		for i := 0; i < aAmnt; i++ {
-			result += aIndex * rindex
-			rindex++
-		}
+		result += aIndex * (aAmnt * (2*rindex + (aAmnt - 1)) / 2)
+		rindex += aAmnt
 		gaps := parsed[index+1]
 		index += 2
 		bIndex := endex / 2
@@ -66,37 +65,37 @@ func solveDay9Part1(parsed []int) int {
 func solveDay9Part2(parsed []int) int {
 	result := 0
 	rindex := 0
-	handled := make([]bool, len(parsed))
+	toHandle := make([]int, (len(parsed)/2)+1)
+	for i := 0; i < len(parsed); i += 2 {
+		toHandle[i/2] = i
+	}
 	for i := 0; i < len(parsed); i++ {
 		gap := i%2 == 1
 		if !gap {
-			if handled[i] {
-				rindex += parsed[i]
+			n := parsed[i]
+			if n < 0 {
+				rindex += (n * -1)
 				continue
 			}
 			val := i / 2
-			for j := 0; j < parsed[i]; j++ {
-				result += val * rindex
-				rindex++
-			}
-			handled[i] = true
+			result += val * (n * (2*rindex + (n - 1)) / 2)
+			rindex += n
 			continue
 		}
 		gapSize := parsed[i]
-		for e := len(parsed) - 1; e > i; e -= 2 {
-			if gapSize == 0 {
-				break
-			}
-			if handled[e] {
+		for e := len(toHandle) - 1; toHandle[e] > i && gapSize > 0; e-- {
+			endex := toHandle[e]
+			if parsed[endex] < 0 {
 				continue
 			}
-			if parsed[e] <= gapSize {
-				for j := 0; j < parsed[e]; j++ {
-					result += (e / 2) * rindex
-					rindex++
-				}
-				handled[e] = true
-				gapSize -= parsed[e]
+			if parsed[endex] <= gapSize {
+				val := endex / 2
+				n := parsed[endex]
+				result += val * (n * (2*rindex + (n - 1)) / 2)
+				rindex += n
+				gapSize -= n
+				parsed[endex] *= -1
+				toHandle = append(toHandle[:e], toHandle[e+1:]...)
 			}
 		}
 		if gapSize > 0 {
@@ -108,7 +107,18 @@ func solveDay9Part2(parsed []int) int {
 
 func Day9(input []string) []string {
 	parsed := parseDay9(input)
-	solution1 := solveDay9Part1(parsed)
-	solution2 := solveDay9Part2(parsed)
+	wg := sync.WaitGroup{}
+	var solution1 int
+	var solution2 int
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		solution1 = solveDay9Part1(parsed)
+	}()
+	go func() {
+		defer wg.Done()
+		solution2 = solveDay9Part2(parsed)
+	}()
+	wg.Wait()
 	return []string{strconv.Itoa(solution1), strconv.Itoa(solution2)}
 }

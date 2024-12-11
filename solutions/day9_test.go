@@ -15,11 +15,11 @@ func TestDay9TestInput(t *testing.T) {
 	}
 }
 
-// func TestDay9(t *testing.T) {
-// 	input := utils.GetInputForTest(9)
-// 	expected := []string{"6301895872542", "0"}
-// 	actual := Day9(input)
-// 	if !reflect.DeepEqual(expected, actual) {
-// 		t.Errorf("Expected %v but was %v", expected, actual)
-// 	}
-// }
+func TestDay9(t *testing.T) {
+	input := utils.GetInputForTest(9)
+	expected := []string{"6301895872542", "6323761685944"}
+	actual := Day9(input)
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected %v but was %v", expected, actual)
+	}
+}
