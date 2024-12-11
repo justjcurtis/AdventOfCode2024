@@ -24,19 +24,17 @@ func solveDay9Part1(parsed []int) int {
 	for true {
 		if index >= endex {
 			if unused > 0 {
-				for i := 0; i < unused; i++ {
-					result += (endex / 2) * rindex
-					rindex++
-				}
+				val := endex / 2
+				n := unused
+				result += val * (n * (2*rindex + (n - 1)) / 2)
+				rindex += n
 			}
 			break
 		}
 		aIndex := index / 2
 		aAmnt := parsed[index]
-		for i := 0; i < aAmnt; i++ {
-			result += aIndex * rindex
-			rindex++
-		}
+		result += aIndex * (aAmnt * (2*rindex + (aAmnt - 1)) / 2)
+		rindex += aAmnt
 		gaps := parsed[index+1]
 		index += 2
 		bIndex := endex / 2
@@ -78,10 +76,9 @@ func solveDay9Part2(parsed []int) int {
 				continue
 			}
 			val := i / 2
-			for j := 0; j < parsed[i]; j++ {
-				result += val * rindex
-				rindex++
-			}
+			n := parsed[i]
+			result += val * (n * (2*rindex + (n - 1)) / 2)
+			rindex += n
 			continue
 		}
 		gapSize := parsed[i]
@@ -91,11 +88,11 @@ func solveDay9Part2(parsed []int) int {
 				continue
 			}
 			if parsed[endex] <= gapSize {
-				for j := 0; j < parsed[endex]; j++ {
-					result += (endex / 2) * rindex
-					rindex++
-				}
-				gapSize -= parsed[endex]
+				val := endex / 2
+				n := parsed[endex]
+				result += val * (n * (2*rindex + (n - 1)) / 2)
+				rindex += n
+				gapSize -= n
 				parsed[endex] *= -1
 				toHandle = append(toHandle[:e], toHandle[e+1:]...)
 			}
