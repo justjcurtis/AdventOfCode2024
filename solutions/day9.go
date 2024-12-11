@@ -2,6 +2,7 @@ package solutions
 
 import (
 	"strconv"
+	"sync"
 )
 
 func parseDay9(input []string) []int {
@@ -71,12 +72,12 @@ func solveDay9Part2(parsed []int) int {
 	for i := 0; i < len(parsed); i++ {
 		gap := i%2 == 1
 		if !gap {
-			if parsed[i] < 0 {
-				rindex += (parsed[i] * -1)
+			n := parsed[i]
+			if n < 0 {
+				rindex += (n * -1)
 				continue
 			}
 			val := i / 2
-			n := parsed[i]
 			result += val * (n * (2*rindex + (n - 1)) / 2)
 			rindex += n
 			continue
@@ -106,7 +107,18 @@ func solveDay9Part2(parsed []int) int {
 
 func Day9(input []string) []string {
 	parsed := parseDay9(input)
-	solution1 := solveDay9Part1(parsed)
-	solution2 := solveDay9Part2(parsed)
+	wg := sync.WaitGroup{}
+	var solution1 int
+	var solution2 int
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		solution1 = solveDay9Part1(parsed)
+	}()
+	go func() {
+		defer wg.Done()
+		solution2 = solveDay9Part2(parsed)
+	}()
+	wg.Wait()
 	return []string{strconv.Itoa(solution1), strconv.Itoa(solution2)}
 }
