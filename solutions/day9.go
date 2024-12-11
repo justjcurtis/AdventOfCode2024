@@ -1,7 +1,6 @@
 package solutions
 
 import (
-	"fmt"
 	"strconv"
 )
 
@@ -65,15 +64,51 @@ func solveDay9Part1(parsed []int) int {
 }
 
 func solveDay9Part2(parsed []int) int {
-	// TODO: Implement part 2
-	// I think I can do this without building processed
-	// I can just keep track of the last gap index that was used up & how much of it remains if any
-	// then I should be able to use a similar solution to part 1
-	return 0
+	result := 0
+	rindex := 0
+	handled := make([]bool, len(parsed))
+	for i := 0; i < len(parsed); i++ {
+		gap := i%2 == 1
+		if !gap {
+			if handled[i] {
+				rindex += parsed[i]
+				continue
+			}
+			val := i / 2
+			for j := 0; j < parsed[i]; j++ {
+				result += val * rindex
+				rindex++
+			}
+			handled[i] = true
+			continue
+		}
+		gapSize := parsed[i]
+		for e := len(parsed) - 1; e > i; e -= 2 {
+			if gapSize == 0 {
+				break
+			}
+			if handled[e] {
+				continue
+			}
+			if parsed[e] <= gapSize {
+				for j := 0; j < parsed[e]; j++ {
+					result += (e / 2) * rindex
+					rindex++
+				}
+				handled[e] = true
+				gapSize -= parsed[e]
+			}
+		}
+		if gapSize > 0 {
+			rindex += gapSize
+		}
+	}
+	return result
 }
 
 func Day9(input []string) []string {
 	parsed := parseDay9(input)
 	solution1 := solveDay9Part1(parsed)
-	return []string{strconv.Itoa(solution1)}
+	solution2 := solveDay9Part2(parsed)
+	return []string{strconv.Itoa(solution1), strconv.Itoa(solution2)}
 }
