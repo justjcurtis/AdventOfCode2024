@@ -66,12 +66,12 @@ func solveDay9Part1(parsed []int) int {
 func solveDay9Part2(parsed []int) int {
 	result := 0
 	rindex := 0
-	handled := make([]bool, len(parsed))
+	maxUnhandled := len(parsed) - 1
 	for i := 0; i < len(parsed); i++ {
 		gap := i%2 == 1
 		if !gap {
-			if handled[i] {
-				rindex += parsed[i]
+			if parsed[i] < 0 {
+				rindex += (parsed[i] * -1)
 				continue
 			}
 			val := i / 2
@@ -79,15 +79,12 @@ func solveDay9Part2(parsed []int) int {
 				result += val * rindex
 				rindex++
 			}
-			handled[i] = true
 			continue
 		}
 		gapSize := parsed[i]
-		for e := len(parsed) - 1; e > i; e -= 2 {
-			if gapSize == 0 {
-				break
-			}
-			if handled[e] {
+		contiguous := true
+		for e := maxUnhandled; e > i && gapSize > 0; e -= 2 {
+			if parsed[e] < 0 {
 				continue
 			}
 			if parsed[e] <= gapSize {
@@ -95,8 +92,13 @@ func solveDay9Part2(parsed []int) int {
 					result += (e / 2) * rindex
 					rindex++
 				}
-				handled[e] = true
 				gapSize -= parsed[e]
+				parsed[e] *= -1
+			} else {
+				if contiguous {
+					maxUnhandled = e
+					contiguous = false
+				}
 			}
 		}
 		if gapSize > 0 {
