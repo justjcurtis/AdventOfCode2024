@@ -1,6 +1,7 @@
 package solutions
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -59,8 +60,42 @@ func solveDay11Part1(stones []int) int {
 	return len(current)
 }
 
+func experiment(parsed []int) {
+	seen := make(map[int]bool)
+	current := make([]int, len(parsed))
+	copy(current, parsed)
+	n := 0
+	for true {
+		next := []int{}
+		noChange := true
+		for _, stone := range current {
+			if _, ok := seen[stone]; ok {
+				continue
+			}
+			noChange = false
+			seen[stone] = true
+			length := intLength(stone)
+			if stone == 0 {
+				next = append(next, 1)
+			} else if length%2 == 0 {
+				left, right := splitStone(stone, length)
+				next = append(next, left, right)
+			} else {
+				next = append(next, stone*2024)
+			}
+		}
+		if noChange {
+			break
+		}
+		current = next
+		n++
+	}
+	fmt.Println("seeen all stones after", n, "iterations")
+}
+
 func Day11(input []string) []string {
 	stones := parseDay11(input)
+	experiment(stones)
 	solution1 := solveDay11Part1(stones)
 	return []string{strconv.Itoa(solution1)}
 }
