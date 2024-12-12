@@ -5,6 +5,7 @@ import (
 	"math"
 	"sort"
 	"strconv"
+	"sync/atomic"
 )
 
 func parseDay12(input []string) []int {
@@ -140,15 +141,22 @@ func solveDay12(parsed []int, w, h int) (int, int) {
 	for i := 0; i < len(parsed); i++ {
 		expandRegion(parsed, i, i, w, h)
 	}
-	part1Price := 0
-	part2Price := 0
-	for k, v := range part1RegionMap {
+	part1Price := int32(0)
+	part2Price := int32(0)
+	keys := []int{}
+	for k := range part1RegionMap {
+		keys = append(keys, k)
+	}
+	fn := func(i int) {
+		k := keys[i]
+		v := part1RegionMap[k]
 		sort.Ints(v)
 		area := len(v)
-		part1Price += area * getPerimeter(k, w, h)
-		part2Price += area * getStraightSidePerimeter(k, w, h)
+		atomic.AddInt32(&part1Price, int32(area*getPerimeter(k, w, h)))
+		atomic.AddInt32(&part2Price, int32(area*getStraightSidePerimeter(k, w, h)))
 	}
-	return part1Price, part2Price
+	utils.ParalleliseVoid(fn, len(keys))
+	return int(part1Price), int(part2Price)
 }
 
 func Day12(input []string) []string {
