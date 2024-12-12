@@ -1,7 +1,7 @@
 package solutions
 
 import (
-	"fmt"
+	"AdventOfCode2024/utils"
 	"math"
 	"strconv"
 	"strings"
@@ -39,63 +39,41 @@ func splitStone(stone, length int) (int, int) {
 	return left, right
 }
 
-func solveDay11Part1(stones []int) int {
-	current := make([]int, len(stones))
-	copy(current, stones)
-	for n := 0; n < 25; n++ {
-		next := []int{}
-		for _, stone := range current {
-			length := intLength(stone)
-			if stone == 0 {
-				next = append(next, 1)
-			} else if length%2 == 0 {
-				left, right := splitStone(stone, length)
-				next = append(next, left, right)
-			} else {
-				next = append(next, stone*2024)
-			}
-		}
-		current = next
+var stoneCache = map[int]int{}
+
+func recurseStoneCount(stone, depth int) int {
+	if depth == 0 {
+		return 1
 	}
-	return len(current)
+	hash := utils.SzudzikPairing(stone, depth)
+	if val, ok := stoneCache[hash]; ok {
+		return val
+	}
+	length := intLength(stone)
+	result := 0
+	if stone == 0 {
+		result = recurseStoneCount(1, depth-1)
+	} else if length%2 == 0 {
+		left, right := splitStone(stone, length)
+		result = recurseStoneCount(left, depth-1) + recurseStoneCount(right, depth-1)
+	} else {
+		result = recurseStoneCount(stone*2024, depth-1)
+	}
+	stoneCache[hash] = result
+	return result
 }
 
-func experiment(parsed []int) {
-	seen := make(map[int]bool)
-	current := make([]int, len(parsed))
-	copy(current, parsed)
-	n := 0
-	for true {
-		next := []int{}
-		noChange := true
-		for _, stone := range current {
-			if _, ok := seen[stone]; ok {
-				continue
-			}
-			noChange = false
-			seen[stone] = true
-			length := intLength(stone)
-			if stone == 0 {
-				next = append(next, 1)
-			} else if length%2 == 0 {
-				left, right := splitStone(stone, length)
-				next = append(next, left, right)
-			} else {
-				next = append(next, stone*2024)
-			}
-		}
-		if noChange {
-			break
-		}
-		current = next
-		n++
+func solveDay11(parsed []int, n int) int {
+	total := 0
+	for _, stone := range parsed {
+		total += recurseStoneCount(stone, n)
 	}
-	fmt.Println("seeen all stones after", n, "iterations")
+	return total
 }
 
 func Day11(input []string) []string {
 	stones := parseDay11(input)
-	experiment(stones)
-	solution1 := solveDay11Part1(stones)
-	return []string{strconv.Itoa(solution1)}
+	solution1 := solveDay11(stones, 25)
+	solution2 := solveDay11(stones, 75)
+	return []string{strconv.Itoa(solution1), strconv.Itoa(solution2)}
 }
