@@ -8,7 +8,7 @@ import (
 
 func TestDay11TestInput(t *testing.T) {
 	input := utils.GetTestInput(11)
-	expected := []string{"55312"}
+	expected := []string{"55312", "65601038650482"}
 	result := Day11(input)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v but was %v", expected, result)
@@ -17,7 +17,7 @@ func TestDay11TestInput(t *testing.T) {
 
 func TestDay11(t *testing.T) {
 	input := utils.GetInputForTest(11)
-	expected := []string{"183484"}
+	expected := []string{"183484", "218817038947400"}
 	result := Day11(input)
 	if !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %v but was %v", expected, result)
