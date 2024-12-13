@@ -29,36 +29,28 @@ func parseDay13(input []string) [][][]int {
 	return parsed
 }
 
-func minTokenCost(ax, ay, bx, by, px, py, ac, bc int, limit bool) int {
-	minCost := -1
-	for n := 0; n <= 100 || !limit; n++ {
-		m := float64((n*bx)-px) / float64(-ax)
-		if m < 0 {
-			break
-		}
-		intM := int(m)
-		if m == float64(intM) {
-			if intM*ay+n*by == py {
-				cost := n*bc + intM*ac
-				if minCost == -1 || cost < minCost {
-					minCost = cost
-				}
-			}
-		}
+func minTokenCost(ax, ay, bx, by, px, py, ac, bc int) int {
+	diff := float64(ax*by - ay*bx)
+	if diff == 0 {
+		return 0
 	}
-	if minCost != -1 {
-		return minCost
+	m := float64(px*by-py*bx) / diff
+	n := float64(py*ax-px*ay) / diff
+	if m != float64(int(m)) || n != float64(int(n)) {
+		return 0
 	}
-	return 0
+	intm := int(m)
+	intn := int(n)
+	return intm*ac + intn*bc
 }
 
-func solveDay13Part1(parsed [][][]int) int {
+func solveDay13(parsed [][][]int, offset int) int {
 	fn := func(i int) int {
 		entry := parsed[i]
 		ax, ay := entry[0][0], entry[0][1]
 		bx, by := entry[1][0], entry[1][1]
 		px, py := entry[2][0], entry[2][1]
-		cost := minTokenCost(ax, ay, bx, by, px, py, 3, 1, true)
+		cost := minTokenCost(ax, ay, bx, by, px+offset, py+offset, 3, 1)
 		return cost
 	}
 	return utils.Parallelise(utils.IntAcc, fn, len(parsed))
@@ -66,6 +58,7 @@ func solveDay13Part1(parsed [][][]int) int {
 
 func Day13(input []string) []string {
 	parsed := parseDay13(input)
-	solution1 := solveDay13Part1(parsed)
-	return []string{strconv.Itoa(solution1)}
+	solution1 := solveDay13(parsed, 0)
+	solution2 := solveDay13(parsed, 10000000000000)
+	return []string{strconv.Itoa(solution1), strconv.Itoa(solution2)}
 }
