@@ -73,21 +73,22 @@ Results show are the min runtime for each soltuion taken over 100 runs as report
 
 | # | Runtime (both parts) |
 | - | -------------------- |
-| Day 1 | 190µs |
-| Day 2 | 243µs |
-| Day 3 | 590µs |
-| Day 4 | 590µs |
-| Day 5 | 503µs |
-| Day 6 | 233ms |
+| Day 1 | 193µs |
+| Day 2 | 230µs |
+| Day 3 | 569µs |
+| Day 4 | 589µs |
+| Day 5 | 501µs |
+| Day 6 | 223ms |
 | Day 7 | 19ms |
 | Day 8 | 111µs |
 | Day 9 | 1ms |
-| Day 10 | 526µs |
-| Day 11 | 291ns |
+| Day 10 | 532µs |
+| Day 11 | 333ns |
 | Day 12 | 4ms |
-| Day 13 | 100µs |
+| Day 13 | 108µs |
+| Day 14 | 1s |
 | ------- | ----------------------------- |
-| **Total** | **261ms** |
+| **Total** | **1s** |
 
 
 ##### [Take Me To The TOP!](#top)
