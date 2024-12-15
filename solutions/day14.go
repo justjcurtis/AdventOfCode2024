@@ -73,8 +73,7 @@ func solveDay14Part1(parsed [][][]int, w, h int) int {
 func calculateEntropyDay14(positions [][]int, w, h, chunkSize int) float64 {
 	chunkCount := (w / chunkSize) * (h / chunkSize)
 	chunkMap := make([]int, chunkCount)
-	mu := sync.Mutex{}
-	fn := func(i int) {
+	for i := 0; i < len(positions); i++ {
 		pos := positions[i]
 		chunkX := pos[0] / chunkSize
 		chunkY := pos[1] / chunkSize
@@ -87,25 +86,19 @@ func calculateEntropyDay14(positions [][]int, w, h, chunkSize int) float64 {
 			}
 			hash = utils.TwoDToOneD(chunkX, chunkY, w/chunkSize)
 		}
-		mu.Lock()
 		chunkMap[hash]++
-		mu.Unlock()
 	}
-	utils.ParalleliseVoid(fn, len(positions))
 
 	entropy := 0.0
-	fn = func(i int) {
+	for i := 0; i < chunkCount; i++ {
 		if chunkMap[i] == 0 {
-			return
+			continue
 		}
 		p := float64(chunkMap[i]) / float64(chunkCount)
 		if p > 0 {
-			mu.Lock()
 			entropy -= p * math.Log2(p)
-			mu.Unlock()
 		}
 	}
-	utils.ParalleliseVoid(fn, chunkCount)
 
 	return entropy
 }
