@@ -14,3 +14,12 @@ func TestDay15TestInput(t *testing.T) {
 		t.Errorf("TestDay15TestInput was incorrect, got: %v, want: %v.", result, expected)
 	}
 }
+
+func TestDay15(t *testing.T) {
+	input := utils.GetInputForTest(15)
+	expected := []string{"1457740", "1467145"}
+	result := Day15(input)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("TestDay15 was incorrect, got: %v, want: %v.", result, expected)
+	}
+}
