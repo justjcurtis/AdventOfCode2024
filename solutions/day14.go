@@ -131,29 +131,23 @@ func printGridDay14(positions [][]int, w, h int) {
 }
 
 func solveDay14Part2(parsed [][][]int, w, h int) int {
-	result := make([][]int, len(parsed))
+	sampleFactor := 26
+	result := make([][]int, len(parsed)/sampleFactor)
 	index := 0
 	entropy := math.MaxFloat64
-	tree := [][]int{}
 	for n := 0; n < 7441; n++ {
 		fn := func(i int) {
 			pos := parsed[i][0]
 			vel := parsed[i][1]
 			result[i] = simulateDay14(pos, vel, w, h, n)
 		}
-		utils.ParalleliseVoid(fn, len(parsed))
+		utils.ParalleliseVoid(fn, len(parsed)/sampleFactor)
 		newEntropy := calculateEntropyDay14(result, w, h, 10)
 		if newEntropy < entropy {
 			entropy = newEntropy
 			index = n
-			tree = make([][]int, len(result))
-			for i := 0; i < len(result); i++ {
-				tree[i] = make([]int, 2)
-				copy(tree[i], result[i])
-			}
 		}
 	}
-	// printGridDay14(tree, w, h)
 	return index
 }
 
